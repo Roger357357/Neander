@@ -4,15 +4,15 @@
 #include <locale.h>
 
 
-int ler_arquivo(FILE *neandertxt, char MatrizI[][4], int Vetor[], char Stexto[], int *endereco_memoria)
+int leitura(FILE *neandertxt, char Nome_Instrucao[][4], int Numero[], char txt[], int *endereco_memoria)
 {
   int i = 0, j = 0;
-  char temp[10], temp1[2], temp2[2], temp3[2], temp4[2], texto[1];
+  char aux[10], aux1[2], aux2[2], aux3[2], aux4[2], texto[1];
 
-  strcpy(temp1, "0");
-  strcpy(temp2, "0");
-  strcpy(temp3, "0");
-  strcpy(temp4, "0");
+  strcpy(aux1, "0");
+  strcpy(aux2, "0");
+  strcpy(aux3, "0");
+  strcpy(aux4, "0");
 
   neandertxt = fopen("Neander.txt", "r");
   if (!neandertxt){
@@ -23,34 +23,29 @@ int ler_arquivo(FILE *neandertxt, char MatrizI[][4], int Vetor[], char Stexto[],
 
   while (!feof(neandertxt))
   {
-    if (i > 256){
-      printf("ERRO: Este micro, dispõe de 256 posições de memória, contudo é impossivel continuar...!\n");
-      return 1;
-    }
+    fgets(txt, 10, neandertxt);
 
-    fgets(Stexto, 10, neandertxt);
+    Nome_Instrucao[i][0] = txt[0];
+    Nome_Instrucao[i][1] = txt[1];
+    Nome_Instrucao[i][2] = txt[2];
+    Nome_Instrucao[i][3] = '\0';
 
-    MatrizI[i][0] = Stexto[0];
-    MatrizI[i][1] = Stexto[1];
-    MatrizI[i][2] = Stexto[2];
-    MatrizI[i][3] = '\0';
+    aux4[0] = txt[2];
 
-    temp4[0] = Stexto[2];
-
-    if (!strcmp(temp4, " "))
+    if (!strcmp(aux4, " "))
       j=3;
     else
       j=4;
 
-    temp1[0] = Stexto[j];
-    temp2[0] = Stexto[j+1];
-    temp3[0] = Stexto[j+2];
+    aux1[0] = txt[j];
+    aux2[0] = txt[j+1];
+    aux3[0] = txt[j+2];
 
-    strcpy(temp, temp1);
-    strcat(temp, temp2);
-    strcat(temp, temp3);
+    strcpy(aux, aux1);
+    strcat(aux, aux2);
+    strcat(aux, aux3);
 
-    Vetor[i] = atoi (temp);
+    Numero[i] = atoi (aux);
 
     i++;
   }
@@ -61,124 +56,142 @@ int ler_arquivo(FILE *neandertxt, char MatrizI[][4], int Vetor[], char Stexto[],
   return 0;
 }
 
-int simulador(char MatrizI[][4], int Vetor[], int *RI, int *PC, int *AC, int *endereco_memoria)
+int teste(char Nome_Instrucao[][4], int Numero[], int *RI, int *PC, int *AC, int *endereco_memoria)
 {
-  if (!strcmp(MatrizI[*PC],"NOP") || !strcmp(MatrizI[*PC],"STA") || !strcmp(MatrizI[*PC],"LDA")||
-  !strcmp(MatrizI[*PC],"ADD")|| !strcmp(MatrizI[*PC],"OR ")|| !strcmp(MatrizI[*PC],"AND")||
-  !strcmp(MatrizI[*PC],"NOT") || !strcmp(MatrizI[*PC],"JMP") || !strcmp(MatrizI[*PC],"HLT") ||
-  (Vetor[*PC] >= -127 & Vetor[*PC] <= 128))
+  if (!strcmp(Nome_Instrucao[*PC],"NOP") || !strcmp(Nome_Instrucao[*PC],"STA") || !strcmp(Nome_Instrucao[*PC],"LDA")||
+  !strcmp(Nome_Instrucao[*PC],"ADD")|| !strcmp(Nome_Instrucao[*PC],"OR ")|| !strcmp(Nome_Instrucao[*PC],"AND")||
+  !strcmp(Nome_Instrucao[*PC],"NOT") || !strcmp(Nome_Instrucao[*PC],"JMP") || !strcmp(Nome_Instrucao[*PC],"HLT") ||
+  (Numero[*PC] >= -127 & Numero[*PC] <= 128))
   {
-    if (!strcmp(MatrizI[*PC] , "HLT"))
+    if (!strcmp(Nome_Instrucao[*PC] , "HLT"))
     {
       printf("\nFIM DA SIMULAÇÃO COM A INSTRUÇÃO HALT\n");
       printf("PC = %d\n", *PC);
       printf("AC = %d\n", *AC);
       printf("MEMÓRIA UTILIZADA = %d Endereços\n", *endereco_memoria);
       return 1;
-    } else if (!strcmp(MatrizI[*PC] , "NOP"))
+    }
+    else if (!strcmp(Nome_Instrucao[*PC] , "NOP"))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• A CPU enviou o conteúdo do PC (%d) que no caso é endereço da próxima instrução via BE, para o REM.\n", *PC);
-      printf("• A MP lê o REM e retorna para o RDM o conteúdo deste endereço via BD. Logo depois o dado (%s %d) é transferido para o RI.\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• O RI passa a instrução para o UC.\n");
-      printf("• A UC decodifica a instrução.\n");
-      printf("• Como se trata de NOP, nada é executado.\n");
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf("Busca de Instrução:\n");
+      printf(" --> A CPU envia o conteúdo do PC (%d) para o REM.\n", *PC);
+      printf(" --> A Memória Principal lê o REM e retorna para o RDM o conteúdo do endereço.\n");
+      printf(" --> Tranfere-se o dado (%s %d) para o RI.\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf(" --> O RI passa a instrução para a Unidade de Controle.\n");
+      printf(" --> Ocorre a decodificação da instrução pela Unidade de Controle.\n");
+      printf("Execução:\n");
+      printf(" --> Nenhuma execução.\n");
       *PC += 1;
-      printf("• Por fim o PC é incrementado:Logo PC = %d", *PC);
-    } else if (!strcmp(MatrizI[*PC] , "STA"))
+      printf(" --> PC parte para próxima instrução, então PC = %d.", *PC);
+    }
+    else if (!strcmp(Nome_Instrucao[*PC] , "STA"))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
-      MatrizI[Vetor[*PC]][0] = *AC;
-      printf("• A CPU enviou o conteúdo do PC (%d) que no caso é endereço da próxima instrução via BE, para o REM.\n", *PC);
-      printf("• A MP lê o REM e retorna para o RDM o conteúdo deste endereço via BD. Logo depois o dado (%s %d) é transferido para o RI.\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• O RI passa a instrução para o UC.\n");
-      printf("• A UC decodifica a instrução.\n");
-      printf("• Como se trata de STA (Armazena AC), a MP recebe um comando de gravação onde são passados endereço (%d) e dado (%d) a ser gravado, que no caso é o dado do AC.\n", Vetor[*PC], *AC);
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
+      Nome_Instrucao[Numero[*PC]][0] = *AC;
+      printf("Busca de Instrução:\n");
+      printf(" --> A CPU envia o conteúdo do PC (%d) para o REM.\n", *PC);
+      printf(" --> A Memória Principal lê o REM e retorna para o RDM o conteúdo deste endereço.");
+      printf(" --> O dado (%s %d) é transferido para o RI.\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf(" --> O RI passa a instrução para o Unidade de Controle.\n");
+      printf(" --> A Unidade de Controle decodifica a instrução.\n");
+      printf("Execução:\n");
+      printf(" --> A Memória Principal recebe um comando para gravar o dado do AC onde são passados o endereço (%d) e o dado (%d) a ser gravado.\n", Numero[*PC], *AC);
       *PC += 1;
-      printf("• Por fim o PC é incrementado: Logo PC = %d", *PC);
-      if (*endereco_memoria < Vetor[*PC]){
+      printf(" --> PC parte para próxima instrução, então PC = %d.", *PC);
+      if (*endereco_memoria < Numero[*PC]){
         *endereco_memoria += 1;
       }
-    }else if (!strcmp(MatrizI[*PC] , "LDA"))
+    }
+    else if (!strcmp(Nome_Instrucao[*PC] , "LDA"))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
-      *AC = atoi (MatrizI[Vetor[*PC]]);
-      printf("• A CPU enviou o conteúdo do PC (%d) que no caso é endereço da próxima instrução via BE, para o REM.\n", *PC);
-      printf("• A MP lê o REM e retorna para o RDM o conteúdo deste endereço via BD. Logo depois o dado (%s %d) é transferido para o RI.\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• O RI passa a instrução para o UC.\n");
-      printf("• A UC decodifica a instrução.\n");
-      printf("• Como se trata de LDA (Carrega AC), a UC passa para ULA a realização da operação IGUAL:\n");
-      printf("  - É realizada uma busca na MP no endereço (%d), retornado o dado (%d)\n", Vetor[*PC], atoi (MatrizI[Vetor[*PC]]));
-      printf("  - O resultado (%d) desta operação é enviado para o AC.\n", *AC);
-      if (*AC < 0){
-        printf("  - Como o resultado (%d) desta operação é negativo a flag N é ativada.\n", *AC);
-
-      }else {
-        printf("  - Como o resultado (%d) desta operação é positivo a flag Z é ativada.\n", *AC);
-      }
-      *PC += 1;
-      printf("• Por fim o PC é incrementado: PC = %d", *PC);
-    }else if(!strcmp(MatrizI[*PC] , "ADD"))
-    {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
-      *AC += atoi (MatrizI[Vetor[*PC]]);
-      printf("• A CPU enviou o conteúdo do PC (%d) que no caso é endereço da próxima instrução via BE, para o REM.\n", *PC);
-      printf("• A MP lê o REM e retorna para o RDM o conteúdo deste endereço via BD. Logo depois o dado (%s %d) é transferido para o RI.\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• O RI passa a instrução para o UC.\n");
-      printf("• A UC decodifica a instrução.\n");
-      printf("• Como se trata de ADD (Soma ao AC), a UC passa para ULA a realização da operação SOMA:\n");
-      printf("  - Esta recebe o dado do AC, e logo após é realizada uma busca na MP no endereço (%d), retornado o dado (%d), e somado-o ao dado do AC;\n", Vetor[*PC], MatrizI[*PC]);
-      printf("  - O resultado (%d) desta operação é enviado para o AC.\n", *AC);
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
+      *AC = atoi (Nome_Instrucao[Numero[*PC]]);
+      printf("Busca de Instrução:\n");
+      printf(" --> A CPU envia o conteúdo do PC (%d) para o REM.\n", *PC);
+      printf(" --> A Memória Principal lê o REM e retorna para o RDM o conteúdo do endereço.\n");
+      printf(" --> O dado (%s %d) é transferido para o RI.\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf(" --> O RI passa a instrução para a Unidade de Controle.\n");
+      printf(" --> A Unidade de Controle decodifica a instrução.\n");
+      printf("Execução:\n");
+      printf(" --> A Unidade de Controle passa para ULA a realização da operação IGUALDADE.\n");
+      printf(" --> É realizada uma busca na Memória Principal no endereço (%d), retornando o dado (%d).\n", Numero[*PC], atoi (Nome_Instrucao[Numero[*PC]]));
+      printf(" --> O resultado (%d) da operação é enviado para o AC.\n", *AC);
       if (*AC < 0)
-        printf("  - Como o resultado (%d) desta operação é negativo a flag N é ativada.\n", *AC);
+      printf(" -->  Como o resultado (%d) da operação é negativo a flag N é ativada.\n", *AC);
       else
-        printf("  - Como o resultado (%d) desta operação é positivo a flag Z é ativada.\n", *AC);
+      {
+      printf(" --> Como o resultado (%d) da operação é positivo a flag Z é ativada.\n", *AC);
+      }
+      *PC += 1;
+      printf(" --> PC parte para próxima instrução, então PC = %d.", *PC);
+    }
+    else if(!strcmp(Nome_Instrucao[*PC] , "ADD"))
+    {
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
+      *AC += atoi (Nome_Instrucao[Numero[*PC]]);
+      printf("Busca de Instrução:\n");
+      printf(" --> A CPU enviou o conteúdo do PC (%d) para o REM.\n", *PC);
+      printf(" --> A Memória Principal lê o REM e retorna para o RDM o conteúdo do endereço.\n");
+      printf(" --> O dado (%s %d) é transferido para o RI.\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf(" --> O RI passa a instrução para a Unidade de Controle.\n");
+      printf(" --> A Unidade de Controle decodifica a instrução.\n");
+      printf("Execução:\n");
+      printf(" --> A Unidade de Controle passa para ULA a realização da operação SOMA.\n");
+      printf(" --> A ULA recebe o dado do AC e realiza uma busca na Memória Principal no endereço (%d), retornando o dado (%d), e somando ao dado do AC.\n", Numero[*PC], Nome_Instrucao[*PC]);
+      printf(" --> O resultado (%d) da operação é enviado para o AC.\n", *AC);
+      if (*AC < 0)
+        printf(" --> Como o resultado (%d) da operação é negativo a flag N é ativada.\n", *AC);
+      else
+        printf(" --> Como o resultado (%d) da operação é positivo a flag Z é ativada.\n", *AC);
 
       *PC += 1;
-      printf("• Por fim o PC é incrementado: PC = %d\n", *PC);
-    }else if(!strcmp(MatrizI[*PC] , "OR "))
+      printf(" --> PC parte para próxima instrução, então PC = %d.", *PC);
+    }
+    else if(!strcmp(Nome_Instrucao[*PC] , "OR "))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
       *PC += 1;
-      printf("• Incrementa o PC: ");
-      printf("PC = %d", *PC);
-    }else if(!strcmp(MatrizI[*PC] , "AND"))
+      printf(" --> PC = %d", *PC);
+    }
+    else if(!strcmp(Nome_Instrucao[*PC] , "AND"))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• Compara AC com Valor da Memoria no Endereço: %d\n", Vetor[*PC]);
-      if (MatrizI[Vetor[*PC]][0] == *AC)
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf("Busca de Instrução:\n");
+      printf(" --> Compara AC com Valor da Memoria no Endereço: %d\n", Numero[*PC]);
+      if (Nome_Instrucao[Numero[*PC]][0] == *AC)
       {
-        printf("  - AC igual ao Valor da Memória no Endereço %d\n", Vetor[*PC]);
+      printf(" --> AC igual ao Valor da Memória no Endereço %d\n", Numero[*PC]);
         *PC = 5;
-        printf("•Incrementa o PC: ");
-        printf("PC = %d", *PC);
-      }else
-      {
-        printf("  - AC diferente ao Valor da Memória no Endereço %d\n", Vetor[*PC]);
-        *PC += 1;
-        printf("•Incrementa o PC: ");
-        printf("PC = %d", *PC);
+        printf(" --> PC = %d", *PC);
       }
-    }else if(!strcmp(MatrizI[*PC] , "NOT"))
+      else
+      {
+      printf(" --> AC diferente ao Valor da Memória no Endereço %d\n", Numero[*PC]);
+        *PC += 1;
+        printf(" --> PC = %d", *PC);
+      }
+    }
+    else if(!strcmp(Nome_Instrucao[*PC] , "NOT"))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
       *PC += 1;
-      printf("• Incrementa o PC: ");
-      printf("• PC = %d", *PC);
-    }else if(!strcmp(MatrizI[*PC] , "JMP"))
+      printf(" --> PC = %d", *PC);
+    }
+    else if(!strcmp(Nome_Instrucao[*PC] , "JMP"))
     {
-      printf("\n%s %d\n", MatrizI[*PC], Vetor[*PC]);
-      printf("• Pula para instrução da linha de comandos %d.\n", Vetor[*PC]);
-      *PC = Vetor[*PC];
-      printf("PC = %d", *PC);
+      printf("\n%s %d\n", Nome_Instrucao[*PC], Numero[*PC]);
+      printf(" --> Pula para instrução da linha de comandos %d.\n", Numero[*PC]);
+      *PC = Numero[*PC];
+      printf(" --> PC = %d", *PC);
     }
     printf("\n");
-  } else
+  }
+  else
   {
-    if (Vetor[*PC] < -127 & Vetor[*PC] > 128)
-    {
+    if (Numero[*PC] < -127 & Numero[*PC] > 128)
       printf("ERRO: Este micro, só pode realizar contas com números > -126 e < 129\n");
-    } else {
+    else {
       printf("ERRO: Fim das instruções, sem serem finalizadas com HALT\n");
     }
     return 1;
@@ -191,8 +204,8 @@ int main ()
 {
   setlocale(LC_ALL, "Portuguese");
   FILE *neandertxt;
-  char MatrizI[256][4], Stexto[9];
-  int Vetor[256], RI = 0, PC = 0, AC = 0, retorno = 0, endereco_memoria = 0;
+  char Nome_Instrucao[100][4], txt[9];
+  int Numero[100], RI = 0, PC = 0, AC = 0, retorno = 0, endereco_memoria = 0;
 
   printf("-------------------------------------------------------------------\n");
   printf("                          Bem-Vindo                                \n");
@@ -200,16 +213,16 @@ int main ()
   printf("                           Neander                                 \n");
   printf("-------------------------------------------------------------------\n\n");
 
-  printf("         Pressione a tecla ENTER para iniciar a simulação\n");
+  printf("                Pressione qualquer tecla\n");
   fgetc(stdin);
 
-  retorno = ler_arquivo(&neandertxt, &MatrizI, &Vetor, &Stexto, &endereco_memoria);
+  retorno = leitura(&neandertxt, &Nome_Instrucao, &Numero, &txt, &endereco_memoria);
 
   if (retorno == 1){
     return 0;
   }
-  while (simulador(&MatrizI, &Vetor, &RI, &PC, &AC, &endereco_memoria) != 1) {
-    printf("         Pressione a tecla ENTER para iniciar a simulação\n");
+  while (teste(&Nome_Instrucao, &Numero, &RI, &PC, &AC, &endereco_memoria) != 1) {
+    printf("                Pressione qualquer tecla\n");
     fgetc(stdin);
   }
 }
